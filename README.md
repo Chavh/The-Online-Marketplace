@@ -13,7 +13,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installing
 
 1. Clone the repository
-```git clone https://github.com/chavh/the-online-marketplace.git```
+```git clone git@github.com:Chavh/The-Online-Marketplace.git```
 
 2. Install the dependencies
  ```npm install``` in frontend and backend root dir
