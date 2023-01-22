@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const router = express.Router();
+
 const cartItems = [
     {
     "id": 0,
@@ -24,8 +26,6 @@ const cartItems = [
     "quantity": 5
   },
 ];
-
-const router = express.Router();
 
 router.get('/cart', (req, res) => {
     // check if cart is empty
