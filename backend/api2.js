@@ -5,6 +5,8 @@ const { Pool } = require('pg');
 const logger = require('morgan');
 const helmet = require('helmet');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const validator = require('validator');
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -47,6 +49,7 @@ router.get('/cart', cors(), async (req, res) => {
     }
 });
 
+//endpoint needs fixing
 router.post('/cart/add', cors(), async (req, res) => {
     try {
         // Connect to the database
@@ -78,7 +81,7 @@ router.post('/cart/add', cors(), async (req, res) => {
         }
 
         // Insert new item into cart table
-        await client.query('INSERT INTO ecommerce.cart (product_id, quantity, product_price) VALUES ($1, $2, $3)', [req.body.productId, req.body.quantity, product.price]);
+        await client.query('INSERT INTO ecommerce.cart (product_id, quantity) VALUES ($1, $2)', [req.body.productId, req.body.quantity]);
 
         // Send response with success message and timestamp
         res.json({ message: 'Item added to cart', success: true, timestamp: new Date().toISOString() });
@@ -102,7 +105,7 @@ router.delete('/cart/delete/:cartItemId', cors(), async (req, res) => {
         }
 
         // Check if item exists in cart table
-        const itemResult = await client.query('SELECT * FROM cart WHERE id = $1', [req.params.cartItemId]);
+        const itemResult = await client.query('SELECT * FROM ecommerce.cart WHERE id = $1', [req.params.cartItemId]);
         const item = itemResult.rows[0];
         if (!item) {
             res.status(404).json({ message: 'Item not found in cart', success: false });
@@ -165,8 +168,8 @@ router.put('/cart/update/:cartItemId', cors(), async (req, res) => {
         if (!item) {
             res.status(404).json({ message: 'Item not found in cart', success: false });
         } else {
-            // Update item in cart table
-            await client.query('UPDATE ecommerce.cart SET product_id = $1, quantity = $2, product_price = $3 WHERE id = $4', [req.body.productId, req.body.quantity, product.price, req.params.cartItemId]);
+            // Update item in cart table 
+            await client.query('UPDATE ecommerce.cart SET product_id = $1, quantity = $2 WHERE id = $3', [req.body.productId, req.body.quantity, req.params.cartItemId]);
 
             // Send response with success message and timestamp
             res.json({ message: 'Item updated in cart', success: true, timestamp: new Date().toISOString() });
@@ -287,6 +290,7 @@ router.post('/category/update/:categoryId', cors(), async (req, res) => {
 
 
 //additional category endpoints
+//adding a category and create above needs to be reworked.
 router.post('/category/add', cors(), async (req, res) => {
     // check if all required data are present
     if (!req.body.categoryName || !req.body.description) {
@@ -371,14 +375,14 @@ router.get('/category/:categoryId/products', cors(), async (req, res) => {
     }
     try {
         const result = await pool.query(
-            'SELECT products FROM ecommerce.categories WHERE id = $1',
+            'SELECT * FROM ecommerce.products WHERE category_id = $1',
             [req.params.categoryId]
         );
         if (result.rowCount === 0) {
             res.status(404).json({ message: 'Category not found', success: false });
             return;
         }
-        res.json(result.rows[0].products);
+        res.json(result.rows);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error', success: false });
@@ -477,27 +481,49 @@ router.get('/user/all', cors(), async (req, res) => {
 
 router.post('/user/signUp', cors(), async (req, res) => {
     try {
+        // Validate the input
+        if (!validator.isEmail(req.body.email) || !validator.isLength(req.body.password, { min: 8 })) {
+            res.status(400).json({ message: 'Invalid email or password', status: 'failed' });
+            return;
+        }
+        // Sanitize the input
+        const email = validator.escape(req.body.email);
+        const firstName = validator.escape(req.body.firstName);
+        const lastName = validator.escape(req.body.lastName);
+        const password = validator.escape(req.body.password);
+
         // Connect to the database
         const client = await pool.connect();
         // Check if email already exists
-        const emailCheck = await client.query('SELECT email FROM users WHERE email = $1', [req.body.email]);
+        const emailCheck = await client.query('SELECT email FROM ecommerce.users WHERE email = $1', [email]);
         if (emailCheck.rowCount > 0) {
             res.status(409).json({ message: 'Email already exists', status: 'failed' });
+            client.release(); // Release the client before returning
             return;
         }
         // Hash the password
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await client.query('BEGIN');
         // Insert the new user into the users table
-        await client.query(`INSERT INTO ecommerce.users (email, first_name, last_name, password) VALUES ($1, $2, $3, $4)`, [req.body.email, req.body.firstName, req.body.lastName, hashedPassword]);
+        const user_id = await client.query(`INSERT INTO ecommerce.users (email, first_name, last_name, password) VALUES ($1, $2, $3, $4) RETURNING id`, [email, firstName, lastName, hashedPassword]);
+
+        await client.query(`INSERT INTO ecommerce.user_profile (id, email, first_name, last_name, username) VALUES ($1, $2, $3, $4, $5)`, [user_id.rows[0].id, email, firstName, lastName, email]);
+
+        await client.query('COMMIT');
         // Send success response
         res.json({ message: 'User registered successfully', status: 'success' });
         // Release the client
         client.release();
     } catch (err) {
+        // Rollback the transaction if there's an error
+        await client.query('ROLLBACK');
         console.error(err);
         res.status(500).json({ message: 'Internal server error', status: 'failed' });
+        client.release(); // Release the client after responding
     }
 });
+
+
 
 router.post('/user/signIn', cors(), async (req, res) => {
     try {
