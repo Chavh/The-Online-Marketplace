@@ -17,7 +17,6 @@ router.use(helmet());
 //cart
 router.get('/cart', cors(), async (req, res) => {
     try {
-        console.log(process.env.DATABASE_URL);
         // Connect to the database
         const client = await pool.connect();
         // Get cart items and products information
