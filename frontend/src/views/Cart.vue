@@ -18,7 +18,7 @@
       <div class="col-2"></div>
       <div class="col-md-3 embed-responsive embed-responsive-16by9">
         <img
-          :src="cartItem.product.imageURL"
+          :src="cartItem.imageurl"
           alt=""
           class="w-100 card-image-top embed-responsive-item"
           style="object-fit: cover"
@@ -30,14 +30,14 @@
         <div class="card-block px-3">
           <h6 class="card-title">
             <router-link
-              :to="{ name: 'ShowDetails', params: { id: cartItem.product.id } }"
+              :to="{ name: 'ShowDetails', params: { id: cartItem.product_id } }"
             >
-              {{ cartItem.product.name }}
+              {{ cartItem.name }}
             </router-link>
           </h6>
 
           <p class="mb-0 font-weight-bold" id="item-price">
-            $ {{ cartItem.product.price }} per unit
+            $ {{ cartItem.price }} per unit
           </p>
           <p class="mb-0" style="float:left">
             Quantity:{{ cartItem.quantity }}
@@ -46,11 +46,11 @@
         <p class="mb-0" style="float:right">
           Total:
           <span class="font-weight-bold">
-            $ {{ cartItem.product.price * cartItem.quantity }}
+            $ {{ cartItem.price * cartItem.quantity }}
           </span>
         </p>
         <br />
-        <a href="#" class="text-right" @click="deleteItem(cartItem.id)"
+        <a href="#" class="text-right" @click="deleteItem(cartItem.cart_item_id)"
           >Remove from cart
         </a>
       </div>

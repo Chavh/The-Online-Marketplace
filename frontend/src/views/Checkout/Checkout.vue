@@ -15,8 +15,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      stripeAPIToken:
-        'pk_test_51Hr18ILR0wfBoBqmrZFhIWWOk0CA8PFS3cEMwh4S1S6jRUzVucZ26dbGIYRk5ezdYlMgUkQmYHGJOsKR35uEHgvV00IXALUhYx',
+      stripeAPIToken:'pk_test_51MT8ziIhAvAiOWAEqHAins1tZcLvG8Y273KWvVPLedaFMVeEwv64uMSo7wKhztHT0hjjLMrbaOu5YZrBQwGNeEMR00PXOcBpOW',
       stripe: '',
       token: null,
       checkoutBodyArray: [],
@@ -33,10 +32,12 @@ export default {
             let products = response.data;
             for (let i = 0; i < products.cartItems.length; i++) {
               this.checkoutBodyArray.push({
-                price: products.cartItems[i].product.price,
+                price: products.cartItems[i].price,
                 quantity: products.cartItems[i].quantity,
-                productName: products.cartItems[i].product.name,
-                productId: products.cartItems[i].product.id,
+                productName: products.cartItems[i].name,
+                productId: products.cartItems[i].product_id,
+                productDescription: products.cartItems[i].description,
+                productImageURL: products.cartItems[i].imageUrl,
               });
             }
           }

@@ -18,7 +18,7 @@ CREATE TABLE ecommerce.products (
 );
 
 CREATE TABLE ecommerce.user_profile (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
     email VARCHAR(255),
     first_name VARCHAR(255),
     last_name VARCHAR(255),

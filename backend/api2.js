@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
+const stripe = require('stripe')('sk_test_51MT8ziIhAvAiOWAEurqbmgKRk71pyw4zjD3dDUDSLLBfyWYxR6y3zHels6VjuHYZ9TTUIzVxmPZ2RGhoQMY0CpbD00jUTl8rPB');
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -21,14 +22,18 @@ router.get('/cart', cors(), async (req, res) => {
     try {
         // Connect to the database
         const client = await pool.connect();
+        // Get the user id associated with the token
+        const token = req.query.token;
+        const tokenCheck = await client.query('SELECT user_id FROM ecommerce.tokens WHERE token = $1', [token]);
+        if (tokenCheck.rowCount === 0) {
+            res.status(404).json({ message: 'Invalid token', success: false });
+            return;
+        }
         // Get cart items and products information
         const cartItemsResult = await client.query(
-            `SELECT ci.id as cart_item_id, ci.quantity, p.id as product_id, p.name, p.description, p.imageURL, p.price
-            FROM ecommerce.cart ci
-            INNER JOIN ecommerce.products p ON ci.product_id = p.id`
+            `SELECT ci.id as cart_item_id, ci.quantity, p.id as product_id, p.name, p.description, p.imageURL, p.price FROM ecommerce.cart ci INNER JOIN ecommerce.products p ON ci.product_id = p.id`
         );
         const cartItems = cartItemsResult.rows;
-
         // Check if cart is empty
         if (cartItems.length === 0) {
             res.status(404).json({ message: 'Cart is empty', success: false });
@@ -54,6 +59,13 @@ router.post('/cart/add', cors(), async (req, res) => {
     try {
         // Connect to the database
         const client = await pool.connect();
+        // Get the user id associated with the token
+        const token = req.query.token;
+        const tokenCheck = await client.query('SELECT user_id FROM ecommerce.tokens WHERE token = $1', [token]);
+        if (tokenCheck.rowCount === 0) {
+            res.status(404).json({ message: 'Invalid token', success: false });
+            return;
+        }
         // Check if productId and quantity are present in request body
         if (!req.body.productId || !req.body.quantity) {
             res.status(400).json({ message: 'productId and quantity are required', success: false });
@@ -98,6 +110,13 @@ router.delete('/cart/delete/:cartItemId', cors(), async (req, res) => {
     try {
         // Connect to the database
         const client = await pool.connect();
+        // Get the user id associated with the token
+        const token = req.query.token;
+        const tokenCheck = await client.query('SELECT user_id FROM ecommerce.tokens WHERE token = $1', [token]);
+        if (tokenCheck.rowCount === 0) {
+            res.status(404).json({ message: 'Invalid token', success: false });
+            return;
+        }
         // Check if cartItemId is a number
         if (isNaN(req.params.cartItemId)) {
             res.status(400).json({ message: 'cartItemId must be a number', success: false });
@@ -130,6 +149,13 @@ router.put('/cart/update/:cartItemId', cors(), async (req, res) => {
     try {
         // Connect to the database
         const client = await pool.connect();
+        // Get the user id associated with the token
+        const token = req.query.token;
+        const tokenCheck = await client.query('SELECT user_id FROM ecommerce.tokens WHERE token = $1', [token]);
+        if (tokenCheck.rowCount === 0) {
+            res.status(404).json({ message: 'Invalid token', success: false });
+            return;
+        }
         // Check if cartItemId is a number
         if (isNaN(req.params.cartItemId)) {
             res.status(400).json({ message: 'cartItemId must be a number', success: false });
@@ -747,28 +773,28 @@ router.post('/order/add', cors(), async (req, res) => {
 
 router.post('/order/create-checkout-session', cors(), async (req, res) => {
     try {
-        // Connect to the database
-        const client = await pool.connect();
-        // Create a new checkout session
+        //TODO: just send prices from frontend and fetch products and prices from db
         const sessionResult = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: req.body.map(item => {
                 return {
+                    price_data: {
+                        unit_amount: item.price * 100, // convert to cents
+                        currency: 'usd',
+                        product_data: {
+                            name: item.productName,  
                     name: item.productName,
-                    amount: item.price * 100, // convert to cents
-                    currency: 'usd',
+                            name: item.productName,  
+                            description: item.productDescription,
+                        },
+                    },
                     quantity: item.quantity
                 };
             }),
-            success_url: 'http://localhost:3000/success',
-            cancel_url: 'http://localhost:3000/cancel'
+            mode: 'payment',
+            success_url: 'http://localhost:8080/success',
+            cancel_url: 'http://localhost:8080/cancel'
         });
-
-        // Insert session into the database
-        await client.query(
-            'INSERT INTO checkout_sessions (session_id, user_id) VALUES ($1, $2)',
-            [sessionResult.id, req.body.userId]
-        );
 
         // Send response with session id
         res.json({ sessionId: sessionResult.id });
