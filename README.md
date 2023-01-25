@@ -35,10 +35,14 @@ These instructions will get you a copy of the project up and running on your loc
 - [Express](https://expressjs.com/) - The web framework for Node.js
 - [PostgreSQL](https://www.postgresql.org/) - The relational database management system
 
-## Snapshots
+## Screenshots
 
-<img src="https://ibb.co/H46DKjp" alt="Screenshot 1">
+- Screenshot 1
+<img src="https://i.ibb.co/h9bRgS1/image.png" alt="image" border="0">
 
-<img src="https://ibb.co/26gSLHh" alt="Screenshot 2">
+- Screenshot 2
+<img src="https://i.ibb.co/GJc91Np/image-1.png" alt="image-1" border="0">
 
-<img src="https://ibb.co/q11Sdg4" alt="Screenshot 3">
+- Screenshot 3
+<img src="https://i.ibb.co/122gLXp/image-2.png" alt="image-2" border="0">
+
