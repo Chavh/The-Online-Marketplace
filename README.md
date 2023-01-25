@@ -34,3 +34,11 @@ These instructions will get you a copy of the project up and running on your loc
 - [Node.js](https://nodejs.org/) - The JavaScript runtime for the backend
 - [Express](https://expressjs.com/) - The web framework for Node.js
 - [PostgreSQL](https://www.postgresql.org/) - The relational database management system
+
+## Snapshots
+
+<img src="https://ibb.co/H46DKjp" alt="Screenshot 1">
+
+<img src="https://ibb.co/26gSLHh" alt="Screenshot 2">
+
+<img src="https://ibb.co/q11Sdg4" alt="Screenshot 3">
