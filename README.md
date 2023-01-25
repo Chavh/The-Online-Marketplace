@@ -35,6 +35,9 @@ These instructions will get you a copy of the project up and running on your loc
 - [Express](https://expressjs.com/) - The web framework for Node.js
 - [PostgreSQL](https://www.postgresql.org/) - The relational database management system
 
+## Note
+This is a demo project and should not be used in production. It is meant to showcase my knowledge in building web applications using the above tech stack.
+
 ## Screenshots
 
 - Screenshot 1
@@ -49,3 +52,11 @@ These instructions will get you a copy of the project up and running on your loc
 - Screenshot 4
  <img src="https://i.ibb.co/122gLXp/image-2.png" alt="image-2" border="0">
 
+## Contact
+If you have any questions or feedback, feel free to reach out to me at tinchavhu@gmail.com.
+
+## License
+This project is licensed under the MIT License.
+
+## Contributions
+This is a demo project and contributions are not currently being accepted.
