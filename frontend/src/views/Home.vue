@@ -4,7 +4,7 @@
       <div class="container py-5">
         <header class="text-left text-white py-5">
           <h3 class="mb-4 rounded" id="heading">
-            <a href="#start-shopping" class="bg-white px-2 py-2 rounded"> Start shopping</a> </h3>
+            <button href="#start-shopping" class="bg-white px-2 py-2 rounded lifted-button"> Start shopping</button> </h3>
             <p class="lead mb-0 bg-dark p-1 rounded"> Demo Ecommerce</p>
         </header>
       </div>
@@ -74,9 +74,19 @@ export default {
     background-size: cover !important;
   }
   #background-div {
-    background: url("../assets/home.png");
+    background: url("../assets/background.png");
   }
   #heading {
     font-weight: 400;
+  }
+  .lifted-button {
+    box-shadow: 2px 2px 1px rgba(94, 92, 92, 0.3) !important;
+    background-color: burlywood !important;
+    z-index: 1;
+  }
+  .lifted-button:hover {
+    cursor: pointer;
+    background-color: rgb(211, 128, 27) !important;
+    z-index: 2;
   }
 </style>
